@@ -1,1 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta name="theme-color" content="#05050d">
+
+    <title>LeoTools</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     SPLASH SCREEN
+===================================================== -->
+
+<div id="splashScreen">
+
+    <div class="splashBackgroundGlow"></div>
+
+    <div class="splashParticles"></div>
+
+
+    <div class="loadingLogoArea">
+
+        <div class="loadingRing ringOne"></div>
+
+        <div class="loadingRing ringTwo"></div>
+
+        <div class="loadingRing ringThree"></div>
+
+        <div class="loadingRing ringFour"></div>
+
+
+        <div class="splashLogo">
+
+            <img
+                src="logo.png"
+                alt="LeoTools">
+
+        </div>
+
+    </div>
+
+
+    <div class="splashBrand">
+
+        <span class="splashLeo">
+            Leo
+        </span>
+
+        <span class="splashTools">
+            Tools
+        </span>
+
+    </div>
+
+
+    <div class="splashTagline">
+
+        CALCULATE
+        <b>•</b>
+        CONVERT
+        <b>•</b>
+        CREATE
+        <b>•</b>
+        SIMPLIFY
+
+    </div>
+
+
+    <div class="loadingArea">
+
+        <div
+            id="loadingText"
+            class="loadingText">
+
+            Initializing LeoTools...
+
+        </div>
+
+
+        <div class="progressOuter">
+
+            <div
+                id="progressBar"
+                class="progressBar">
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="loadingPercent"
+            class="loadingPercent">
+
+            0%
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MAIN APPLICATION
+===================================================== -->
+
+<div
+    id="mainApp"
+    class="mainApp hidden">
+
+
+    <!-- HEADER -->
+
+    <header class="appHeader">
+
+
+        <button
+            class="headerButton"
+            onclick="openSideMenu()">
+
+            ☰
+
+        </button>
+
+
+        <div class="appLogoText">
+
+            <span>
+                Leo
+            </span>
+
+            <b>
+                Tools
+            </b>
+
+        </div>
+
+
+        <button
+            class="premiumCrown"
+            onclick="showPremium()">
+
+            👑
+
+        </button>
+
+    </header>
+
+
+
+    <!-- SEARCH -->
+
+    <div class="searchWrapper">
+
+        <span class="searchSymbol">
+            ⌕
+        </span>
+
+
+        <input
+            id="searchInput"
+            type="text"
+            placeholder="Search any tool..."
+            oninput="searchTools()">
+
+
+        <button
+            class="voiceButton"
+            onclick="voiceSearch()">
+
+            🎙
+
+        </button>
+
+    </div>
+
+
+
+    <!-- HERO CARD -->
+
+    <section class="heroCard">
+
+
+        <div class="heroContent">
+
+            <div class="helloText">
+
+                Hello, Leo! 👋
+
+            </div>
+
+
+            <h1>
+
+                Smart Tools
+                <br>
+                For Smart People
+
+            </h1>
+
+
+            <p>
+
+                Calculate. Convert.
+                Create. Simplify.
+
+            </p>
+
+        </div>
+
+
+        <div class="lionGraphic">
+
+            🦁
+
+        </div>
+
+
+        <button
+            class="heroArrow"
+            onclick="openTool('calculator')">
+
+            →
+
+        </button>
+
+    </section>
+
+
+
+    <!-- CATEGORY GRID -->
+
+    <section
+        id="toolGrid"
+        class="toolGrid">
+
+
+        <!-- CALCULATE -->
+
+        <div
+            class="homeTool purpleTool"
+            data-name="calculate calculator"
+            onclick="openTool('calculator')">
+
+            <div class="homeIcon">
+                🧮
+            </div>
+
+            <strong>
+                Calculate
+            </strong>
+
+            <small>
+                Smart Calculators
+            </small>
+
+        </div>
+
+
+
+        <!-- MONEY -->
+
+        <div
+            class="homeTool greenTool"
+            data-name="money finance splitter gst"
+            onclick="openTool('money')">
+
+            <div class="homeIcon">
+                ₹
+            </div>
+
+            <strong>
+                Money
+            </strong>
+
+            <small>
+                Finance Tools
+            </small>
+
+        </div>
+
+
+
+        <!-- CONVERT -->
+
+        <div
+            class="homeTool blueTool"
+            data-name="convert converter unit length weight"
+            onclick="openTool('converter')">
+
+            <div class="homeIcon">
+                ⇄
+            </div>
+
+            <strong>
+                Convert
+            </strong>
+
+            <small>
+                Unit Converter
+            </small>
+
+        </div>
+
+
+
+        <!-- DATE -->
+
+        <div
+            class="homeTool orangeTool"
+            data-name="date age time birthday"
+            onclick="openTool('age')">
+
+            <div class="homeIcon">
+                25
+            </div>
+
+            <strong>
+                Date & Age
+            </strong>
+
+            <small>
+                Date, Age, Time
+            </small>
+
+        </div>
+
+
+
+        <!-- BILLS -->
+
+        <div
+            class="homeTool pinkTool"
+            data-name="bill bills expense gst tax"
+            onclick="openTool('bills')">
+
+            <div class="homeIcon">
+                🧾
+            </div>
+
+            <strong>
+                Bills
+            </strong>
+
+            <small>
+                Bill & Expense
+            </small>
+
+        </div>
+
+
+
+        <!-- TOOLS -->
+
+        <div
+            class="homeTool cyanTool"
+            data-name="tools daily utilities stopwatch timer"
+            onclick="openTool('daily')">
+
+            <div class="homeIcon">
+                🧰
+            </div>
+
+            <strong>
+                Tools
+            </strong>
+
+            <small>
+                Daily Utilities
+            </small>
+
+        </div>
+
+
+
+        <!-- SECURITY -->
+
+        <div
+            class="homeTool tealTool"
+            data-name="security password secure"
+            onclick="openTool('security')">
+
+            <div class="homeIcon">
+                🛡
+            </div>
+
+            <strong>
+                Security
+            </strong>
+
+            <small>
+                Secure Tools
+            </small>
+
+        </div>
+
+
+
+        <!-- QR -->
+
+        <div
+            class="homeTool yellowTool"
+            data-name="qr scanner generator"
+            onclick="openTool('qr')">
+
+            <div class="homeIcon">
+                ▦
+            </div>
+
+            <strong>
+                QR Scanner
+            </strong>
+
+            <small>
+                Scan & Generate
+            </small>
+
+        </div>
+
+
+
+        <!-- NOTES -->
+
+        <div
+            class="homeTool violetTool"
+            data-name="notes quick notes"
+            onclick="openTool('notes')">
+
+            <div class="homeIcon">
+                📝
+            </div>
+
+            <strong>
+                Notes
+            </strong>
+
+            <small>
+                Quick Notes
+            </small>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- INFO -->
+
+    <div class="infoStrip">
+
+        🔥
+
+        <b>
+            100+ Tools
+        </b>
+
+        <span>|</span>
+
+        Offline First
+
+        <span>|</span>
+
+        100% Secure
+
+    </div>
+
+
+
+    <!-- PAGE CONTENT -->
+
+    <main
+        id="pageContent"
+        class="pageContent">
+
+    </main>
+
+
+
+    <!-- BOTTOM NAV -->
+
+    <nav class="bottomNavigation">
+
+
+        <button
+            class="bottomItem active"
+            onclick="changePage('home',this)">
+
+            <span>
+                ⌂
+            </span>
+
+            <small>
+                Home
+            </small>
+
+        </button>
+
+
+
+        <button
+            class="bottomItem"
+            onclick="changePage('tools',this)">
+
+            <span>
+                ◈
+            </span>
+
+            <small>
+                Tools
+            </small>
+
+        </button>
+
+
+
+        <button
+            class="plusButton"
+            onclick="openQuickTools()">
+
+            +
+
+        </button>
+
+
+
+        <button
+            class="bottomItem"
+            onclick="changePage('history',this)">
+
+            <span>
+                ◷
+            </span>
+
+            <small>
+                History
+            </small>
+
+        </button>
+
+
+
+        <button
+            class="bottomItem"
+            onclick="changePage('favorites',this)">
+
+            <span>
+                ☆
+            </span>
+
+            <small>
+                Favorites
+            </small>
+
+        </button>
+
+    </nav>
+
+</div>
+
+
+
+<!-- =====================================================
+     SIDE MENU
+===================================================== -->
+
+<div
+    id="sideOverlay"
+    class="sideOverlay"
+    onclick="closeSideMenu()">
+</div>
+
+
+<aside
+    id="sideMenu"
+    class="sideMenu">
+
+
+    <div class="sideHeader">
+
+        <div>
+
+            <span>
+                Leo
+            </span>
+
+            <b>
+                Tools
+            </b>
+
+        </div>
+
+
+        <button
+            onclick="closeSideMenu()">
+
+            ×
+
+        </button>
+
+    </div>
+
+
+    <div class="sideLine"></div>
+
+
+    <div
+        class="sideItem"
+        onclick="closeSideMenu()">
+
+        🏠
+        Home
+
+    </div>
+
+
+    <div
+        class="sideItem"
+        onclick="openTool('calculator')">
+
+        🧮
+        Calculators
+
+    </div>
+
+
+    <div
+        class="sideItem"
+        onclick="openTool('money')">
+
+        ₹
+        Money
+
+    </div>
+
+
+    <div
+        class="sideItem"
+        onclick="openTool('converter')">
+
+        ⇄
+        Converter
+
+    </div>
+
+
+    <div
+        class="sideItem"
+        onclick="openTool('age')">
+
+        📅
+        Date & Age
+
+    </div>
+
+
+    <div
+        class="sideItem"
+        onclick="openTool('bills')">
+
+        🧾
+        Bills
+
+    </div>
+
+
+    <div
+        class="sideItem"
+        onclick="openTool('security')">
+
+        🛡
+        Security
+
+    </div>
+
+
+    <div
+        class="sideItem"
+        onclick="openTool('notes')">
+
+        📝
+        Notes
+
+    </div>
+
+
+</aside>
+
+
+
+<!-- =====================================================
+     FULL SCREEN TOOL
+===================================================== -->
+
+<div
+    id="toolScreen"
+    class="toolScreen">
+
+
+    <!-- TOOL TOP BAR -->
+
+    <div class="toolHeader">
+
+
+        <button
+            class="premiumBack"
+            onclick="closeTool()">
+
+            <span>
+                ‹
+            </span>
+
+            <small>
+                BACK
+            </small>
+
+        </button>
+
+
+
+        <div class="toolHeaderTitle">
+
+
+            <div
+                id="toolHeaderIcon"
+                class="toolHeaderIcon">
+
+                🧮
+
+            </div>
+
+
+            <div>
+
+                <h2
+                    id="toolHeaderName">
+
+                    Smart Calculator
+
+                </h2>
+
+
+                <p
+                    id="toolHeaderDescription">
+
+                    Calculate anything
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <button
+            class="toolMore">
+
+            ⋮
+
+        </button>
+
+    </div>
+
+
+
+    <!-- TOOL BODY -->
+
+    <div
+        id="toolBody"
+        class="toolBody">
+
+    </div>
+
+
+
+    <!-- EXIT -->
+
+    <button
+        class="exitToolButton"
+        onclick="closeTool()">
+
+        <span>
+            ✕
+        </span>
+
+        EXIT TOOL
+
+    </button>
+
+</div>
+
+
+
+<script src="app.js"></script>
+
+</body>
+
+  </html>
