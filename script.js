@@ -1,172 +1,1054 @@
 /* =====================================================
-   LEO TOOLS
-   Complete App JavaScript
+   LeoTools
+   Complete Main JavaScript
 ===================================================== */
+
+"use strict";
 
 
 /* =====================================================
-   GLOBAL VARIABLES
+   GLOBAL
 ===================================================== */
 
 let currentTool = null;
 
-let calculatorValue = "";
-
-let calculatorExpression = "";
-
 let historyData =
-    JSON.parse(
-        localStorage.getItem("leoToolsHistory")
-    ) || [];
+    JSON.parse(localStorage.getItem("leoToolsHistory")) || [];
 
 let favoriteTools =
-    JSON.parse(
-        localStorage.getItem("leoToolsFavorites")
-    ) || [];
-
+    JSON.parse(localStorage.getItem("leoToolsFavorites")) || [];
 
 
 /* =====================================================
    SPLASH SCREEN
 ===================================================== */
 
-const splash =
-    document.getElementById(
-        "splashScreen"
-    );
+document.addEventListener("DOMContentLoaded", () => {
 
-const mainApp =
-    document.getElementById(
-        "mainApp"
-    );
+    const splash =
+        document.getElementById("splashScreen");
 
-const progressBar =
-    document.getElementById(
-        "progressBar"
-    );
+    const mainApp =
+        document.getElementById("mainApp");
 
-const progressText =
-    document.getElementById(
-        "loadingPercent"
-    );
+    const progressBar =
+        document.getElementById("progressBar");
 
-const loadingText =
-    document.getElementById(
-        "loadingText"
-    );
+    const progressText =
+        document.getElementById("loadingPercent");
+
+    const loadingText =
+        document.getElementById("loadingText");
 
 
-const loadingMessages = [
-
-    "Initializing LeoTools...",
-
-    "Loading smart tools...",
-
-    "Preparing calculators...",
-
-    "Loading converters...",
-
-    "Securing your data...",
-
-    "Almost ready..."
-
-];
+    if (!splash || !mainApp) {
+        console.error("LeoTools loading error");
+        return;
+    }
 
 
-let progress = 0;
-
-let messageIndex = 0;
+    mainApp.classList.add("hidden");
 
 
-const splashTimer =
-    setInterval(() => {
+    const messages = [
+        "Initializing LeoTools...",
+        "Loading smart tools...",
+        "Preparing calculators...",
+        "Loading converters...",
+        "Securing your data...",
+        "Almost ready..."
+    ];
 
-        progress +=
-            Math.floor(
-                Math.random() * 5
-            ) + 2;
+
+    let progress = 0;
 
 
-        if (progress > 100) {
+    const timer = setInterval(() => {
 
+        progress += Math.floor(Math.random() * 5) + 3;
+
+        if (progress >= 100) {
             progress = 100;
-
         }
 
 
-        progressBar.style.width =
-            progress + "%";
+        if (progressBar) {
+            progressBar.style.width =
+                progress + "%";
+        }
 
 
-        progressText.textContent =
-            progress + "%";
+        if (progressText) {
+            progressText.textContent =
+                progress + "%";
+        }
 
 
-        const newIndex =
-            Math.min(
-                Math.floor(progress / 18),
-                loadingMessages.length - 1
-            );
+        if (loadingText) {
 
-
-        if (
-            newIndex !== messageIndex
-        ) {
-
-            messageIndex = newIndex;
+            const index =
+                Math.min(
+                    Math.floor(progress / 18),
+                    messages.length - 1
+                );
 
             loadingText.textContent =
-                loadingMessages[
-                    messageIndex
-                ];
+                messages[index];
 
         }
 
 
         if (progress >= 100) {
 
-            clearInterval(
-                splashTimer
-            );
+            clearInterval(timer);
 
-            setTimeout(
-                finishSplash,
-                500
-            );
+
+            setTimeout(() => {
+
+                splash.classList.add("splashHide");
+
+
+                setTimeout(() => {
+
+                    splash.style.display = "none";
+
+                    mainApp.classList.remove("hidden");
+
+                    document.body.style.overflow =
+                        "auto";
+
+                }, 600);
+
+            }, 500);
 
         }
 
     }, 100);
 
+});
 
 
-function finishSplash() {
+/* =====================================================
+   TOOL DATA
+===================================================== */
 
-    splash.style.opacity = "0";
+const tools = {
 
-    splash.style.transform =
-        "scale(1.05)";
+    calculator: {
+        name: "Smart Calculator",
+        description: "Calculate anything",
+        icon: "🧮"
+    },
+
+    money: {
+        name: "Money Splitter",
+        description: "Split money easily",
+        icon: "₹"
+    },
+
+    converter: {
+        name: "Unit Converter",
+        description: "Convert units instantly",
+        icon: "⇄"
+    },
+
+    age: {
+        name: "Date & Age",
+        description: "Calculate age and dates",
+        icon: "📅"
+    },
+
+    bills: {
+        name: "Bill Calculator",
+        description: "Calculate bills and GST",
+        icon: "🧾"
+    },
+
+    daily: {
+        name: "Daily Tools",
+        description: "Useful everyday utilities",
+        icon: "🧰"
+    },
+
+    security: {
+        name: "Security Tools",
+        description: "Generate secure passwords",
+        icon: "🛡"
+    },
+
+    qr: {
+        name: "QR Scanner",
+        description: "Scan and generate QR",
+        icon: "▦"
+    },
+
+    notes: {
+        name: "Quick Notes",
+        description: "Save your notes",
+        icon: "📝"
+    }
+
+};
 
 
-    setTimeout(() => {
+/* =====================================================
+   OPEN TOOL
+===================================================== */
 
-        splash.classList.add(
-            "hidden"
+function openTool(toolName) {
+
+    const tool =
+        tools[toolName];
+
+    if (!tool) return;
+
+
+    currentTool = toolName;
+
+
+    const screen =
+        document.getElementById("toolScreen");
+
+    const name =
+        document.getElementById("toolHeaderName");
+
+    const description =
+        document.getElementById(
+            "toolHeaderDescription"
         );
 
-        mainApp.classList.remove(
-            "hidden"
+    const icon =
+        document.getElementById(
+            "toolHeaderIcon"
         );
 
-        window.scrollTo(
-            0,
-            0
-        );
+    const body =
+        document.getElementById("toolBody");
 
-    }, 700);
+
+    name.textContent =
+        tool.name;
+
+    description.textContent =
+        tool.description;
+
+    icon.textContent =
+        tool.icon;
+
+
+    if (toolName === "calculator") {
+
+        body.innerHTML = calculatorHTML();
+
+    }
+
+    else if (toolName === "money") {
+
+        body.innerHTML = moneyHTML();
+
+    }
+
+    else if (toolName === "converter") {
+
+        body.innerHTML = converterHTML();
+
+    }
+
+    else if (toolName === "age") {
+
+        body.innerHTML = ageHTML();
+
+    }
+
+    else if (toolName === "bills") {
+
+        body.innerHTML = billHTML();
+
+    }
+
+    else if (toolName === "daily") {
+
+        body.innerHTML = dailyHTML();
+
+    }
+
+    else if (toolName === "security") {
+
+        body.innerHTML = securityHTML();
+
+    }
+
+    else if (toolName === "qr") {
+
+        body.innerHTML = qrHTML();
+
+    }
+
+    else if (toolName === "notes") {
+
+        body.innerHTML = notesHTML();
+
+    }
+
+
+    screen.classList.add("active");
+
+    document.body.style.overflow =
+        "hidden";
+
+
+    history.pushState(
+        { tool: toolName },
+        "",
+        "#tool-" + toolName
+    );
 
 }
 
+
+/* =====================================================
+   CLOSE TOOL
+===================================================== */
+
+function closeTool() {
+
+    const screen =
+        document.getElementById("toolScreen");
+
+    screen.classList.remove("active");
+
+    document.body.style.overflow =
+        "auto";
+
+    currentTool = null;
+
+
+    if (location.hash.startsWith("#tool-")) {
+
+        history.replaceState(
+            null,
+            "",
+            location.pathname
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   BACK BUTTON
+===================================================== */
+
+window.addEventListener("popstate", () => {
+
+    if (currentTool) {
+        closeTool();
+    }
+
+});
+
+
+/* =====================================================
+   CALCULATOR
+===================================================== */
+
+function calculatorHTML() {
+
+    return `
+
+        <div class="calculator">
+
+            <input
+                id="calcDisplay"
+                class="calcDisplay"
+                value="0"
+                readonly>
+
+
+            <div class="calcGrid">
+
+                <button onclick="clearCalc()">AC</button>
+                <button onclick="calcInput('/')">÷</button>
+                <button onclick="calcInput('*')">×</button>
+                <button onclick="calcInput('-')">−</button>
+
+                <button onclick="calcInput('7')">7</button>
+                <button onclick="calcInput('8')">8</button>
+                <button onclick="calcInput('9')">9</button>
+                <button onclick="calcInput('+')">+</button>
+
+                <button onclick="calcInput('4')">4</button>
+                <button onclick="calcInput('5')">5</button>
+                <button onclick="calcInput('6')">6</button>
+                <button onclick="calcBack()">⌫</button>
+
+                <button onclick="calcInput('1')">1</button>
+                <button onclick="calcInput('2')">2</button>
+                <button onclick="calcInput('3')">3</button>
+                <button onclick="calculateResult()">=</button>
+
+                <button class="zero"
+                        onclick="calcInput('0')">
+                    0
+                </button>
+
+                <button onclick="calcInput('.')">
+                    .
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+let calcValue = "";
+
+
+function calcInput(value) {
+
+    calcValue += value;
+
+    document.getElementById(
+        "calcDisplay"
+    ).value = calcValue;
+
+}
+
+
+function clearCalc() {
+
+    calcValue = "";
+
+    document.getElementById(
+        "calcDisplay"
+    ).value = "0";
+
+}
+
+
+function calcBack() {
+
+    calcValue =
+        calcValue.slice(0, -1);
+
+    document.getElementById(
+        "calcDisplay"
+    ).value =
+        calcValue || "0";
+
+}
+
+
+function calculateResult() {
+
+    try {
+
+        const result =
+            Function(
+                `"use strict"; return (${calcValue})`
+            )();
+
+        calcValue =
+            String(result);
+
+        document.getElementById(
+            "calcDisplay"
+        ).value =
+            calcValue;
+
+    }
+
+    catch {
+
+        document.getElementById(
+            "calcDisplay"
+        ).value =
+            "Error";
+
+        calcValue = "";
+
+    }
+
+}
+
+
+/* =====================================================
+   MONEY
+===================================================== */
+
+function moneyHTML() {
+
+    return `
+
+        <div class="toolCard">
+
+            <h3>₹ Money Splitter</h3>
+
+            <input
+                id="moneyAmount"
+                type="number"
+                placeholder="Total amount">
+
+            <input
+                id="moneyPeople"
+                type="number"
+                placeholder="Number of people">
+
+            <button onclick="splitMoney()">
+                Split Money
+            </button>
+
+            <div id="moneyResult"></div>
+
+        </div>
+
+    `;
+
+}
+
+
+function splitMoney() {
+
+    const amount =
+        Number(
+            document.getElementById(
+                "moneyAmount"
+            ).value
+        );
+
+    const people =
+        Number(
+            document.getElementById(
+                "moneyPeople"
+            ).value
+        );
+
+
+    if (!amount || !people) {
+
+        alert("Enter amount and people");
+
+        return;
+
+    }
+
+
+    const each =
+        amount / people;
+
+
+    document.getElementById(
+        "moneyResult"
+    ).innerHTML =
+        `Each person pays <b>₹${each.toFixed(2)}</b>`;
+
+}
+
+
+/* =====================================================
+   CONVERTER
+===================================================== */
+
+function converterHTML() {
+
+    return `
+
+        <div class="toolCard">
+
+            <h3>⇄ Unit Converter</h3>
+
+            <input
+                id="convertValue"
+                type="number"
+                placeholder="Enter value">
+
+            <select id="convertType">
+
+                <option value="km">
+                    Kilometer → Meter
+                </option>
+
+                <option value="m">
+                    Meter → Centimeter
+                </option>
+
+                <option value="kg">
+                    Kilogram → Gram
+                </option>
+
+            </select>
+
+            <button onclick="convertUnit()">
+                Convert
+            </button>
+
+            <div id="convertResult"></div>
+
+        </div>
+
+    `;
+
+}
+
+
+function convertUnit() {
+
+    const value =
+        Number(
+            document.getElementById(
+                "convertValue"
+            ).value
+        );
+
+    const type =
+        document.getElementById(
+            "convertType"
+        ).value;
+
+
+    let result;
+
+
+    if (type === "km") {
+        result = value * 1000 + " m";
+    }
+
+    else if (type === "m") {
+        result = value * 100 + " cm";
+    }
+
+    else if (type === "kg") {
+        result = value * 1000 + " g";
+    }
+
+
+    document.getElementById(
+        "convertResult"
+    ).innerHTML =
+        `<b>${result}</b>`;
+
+}
+
+
+/* =====================================================
+   AGE
+===================================================== */
+
+function ageHTML() {
+
+    return `
+
+        <div class="toolCard">
+
+            <h3>📅 Age Calculator</h3>
+
+            <input
+                id="birthDate"
+                type="date">
+
+            <button onclick="calculateAge()">
+                Calculate Age
+            </button>
+
+            <div id="ageResult"></div>
+
+        </div>
+
+    `;
+
+}
+
+
+function calculateAge() {
+
+    const birth =
+        new Date(
+            document.getElementById(
+                "birthDate"
+            ).value
+        );
+
+    if (isNaN(birth)) return;
+
+
+    const today =
+        new Date();
+
+
+    let age =
+        today.getFullYear() -
+        birth.getFullYear();
+
+
+    const month =
+        today.getMonth() -
+        birth.getMonth();
+
+
+    if (
+        month < 0 ||
+        (
+            month === 0 &&
+            today.getDate() <
+            birth.getDate()
+        )
+    ) {
+
+        age--;
+
+    }
+
+
+    document.getElementById(
+        "ageResult"
+    ).innerHTML =
+        `Your age is <b>${age} years</b>`;
+
+}
+
+
+/* =====================================================
+   BILL
+===================================================== */
+
+function billHTML() {
+
+    return `
+
+        <div class="toolCard">
+
+            <h3>🧾 Bill Calculator</h3>
+
+            <input
+                id="billAmount"
+                type="number"
+                placeholder="Bill amount">
+
+            <input
+                id="billGST"
+                type="number"
+                placeholder="GST %"
+                value="18">
+
+            <button onclick="calculateBill()">
+                Calculate Bill
+            </button>
+
+            <div id="billResult"></div>
+
+        </div>
+
+    `;
+
+}
+
+
+function calculateBill() {
+
+    const amount =
+        Number(
+            document.getElementById(
+                "billAmount"
+            ).value
+        );
+
+    const gst =
+        Number(
+            document.getElementById(
+                "billGST"
+            ).value
+        );
+
+
+    const tax =
+        amount * gst / 100;
+
+    const total =
+        amount + tax;
+
+
+    document.getElementById(
+        "billResult"
+    ).innerHTML =
+
+        `GST: ₹${tax.toFixed(2)}
+         <br>
+         Total: <b>₹${total.toFixed(2)}</b>`;
+
+}
+
+
+/* =====================================================
+   DAILY TOOLS
+===================================================== */
+
+function dailyHTML() {
+
+    return `
+
+        <div class="toolCard">
+
+            <h3>🧰 Daily Tools</h3>
+
+            <div class="dailyClock"
+                 id="dailyClock">
+                00:00:00
+            </div>
+
+            <button onclick="startTimer()">
+                Start Timer
+            </button>
+
+        </div>
+
+    `;
+
+}
+
+
+let timerSeconds = 0;
+let timerInterval = null;
+
+
+function startTimer() {
+
+    if (timerInterval) return;
+
+
+    timerInterval =
+        setInterval(() => {
+
+            timerSeconds++;
+
+
+            const h =
+                String(
+                    Math.floor(
+                        timerSeconds / 3600
+                    )
+                ).padStart(2, "0");
+
+
+            const m =
+                String(
+                    Math.floor(
+                        (timerSeconds % 3600) / 60
+                    )
+                ).padStart(2, "0");
+
+
+            const s =
+                String(
+                    timerSeconds % 60
+                ).padStart(2, "0");
+
+
+            const clock =
+                document.getElementById(
+                    "dailyClock"
+                );
+
+
+            if (clock) {
+
+                clock.textContent =
+                    `${h}:${m}:${s}`;
+
+            }
+
+        }, 1000);
+
+}
+
+
+/* =====================================================
+   SECURITY
+===================================================== */
+
+function securityHTML() {
+
+    return `
+
+        <div class="toolCard">
+
+            <h3>🛡 Password Generator</h3>
+
+            <input
+                id="passwordLength"
+                type="number"
+                value="16"
+                min="6"
+                max="64">
+
+            <button onclick="generatePassword()">
+                Generate Password
+            </button>
+
+            <div
+                id="passwordResult"
+                class="passwordResult">
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+function generatePassword() {
+
+    const length =
+        Number(
+            document.getElementById(
+                "passwordLength"
+            ).value
+        );
+
+
+    const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+        "abcdefghijklmnopqrstuvwxyz" +
+        "0123456789!@#$%^&*";
+
+
+    let password = "";
+
+
+    for (
+        let i = 0;
+        i < length;
+        i++
+    ) {
+
+        password +=
+            chars[
+                Math.floor(
+                    Math.random() *
+                    chars.length
+                )
+            ];
+
+    }
+
+
+    document.getElementById(
+        "passwordResult"
+    ).textContent =
+        password;
+
+}
+
+
+/* =====================================================
+   QR
+===================================================== */
+
+function qrHTML() {
+
+    return `
+
+        <div class="toolCard qrCard">
+
+            <h3>▦ QR Scanner</h3>
+
+            <p>
+                QR Scanner & Generator
+            </p>
+
+            <button onclick="alert('QR Scanner ready')">
+                Open Scanner
+            </button>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   NOTES
+===================================================== */
+
+function notesHTML() {
+
+    return `
+
+        <div class="toolCard">
+
+            <h3>📝 Quick Notes</h3>
+
+            <textarea
+                id="quickNote"
+                placeholder="Write your note...">
+            </textarea>
+
+            <button onclick="saveNote()">
+                Save Note
+            </button>
+
+            <div id="notesResult"></div>
+
+        </div>
+
+    `;
+
+}
+
+
+function saveNote() {
+
+    const note =
+        document.getElementById(
+            "quickNote"
+        ).value.trim();
+
+
+    if (!note) {
+
+        alert("Write something first");
+
+        return;
+
+    }
+
+
+    const notes =
+        JSON.parse(
+            localStorage.getItem(
+                "leoToolsNotes"
+            )
+        ) || [];
+
+
+    notes.push({
+
+        text: note,
+
+        date:
+            new Date().toLocaleString()
+
+    });
+
+
+    localStorage.setItem(
+        "leoToolsNotes",
+        JSON.stringify(notes)
+    );
+
+
+    document.getElementById(
+        "notesResult"
+    ).innerHTML =
+        "✅ Note saved successfully";
+
+}
 
 
 /* =====================================================
@@ -199,2145 +1081,105 @@ function closeSideMenu() {
 }
 
 
-
-/* =====================================================
-   TOOL DATA
-===================================================== */
-
-const toolData = {
-
-    calculator: {
-
-        title: "Smart Calculator",
-
-        description: "Calculate anything",
-
-        icon: "🧮"
-
-    },
-
-
-    money: {
-
-        title: "Money Splitter",
-
-        description: "Split expenses easily",
-
-        icon: "₹"
-
-    },
-
-
-    converter: {
-
-        title: "Unit Converter",
-
-        description: "Convert any unit",
-
-        icon: "⇄"
-
-    },
-
-
-    age: {
-
-        title: "Date & Age",
-
-        description: "Calculate your age",
-
-        icon: "📅"
-
-    },
-
-
-    bills: {
-
-        title: "Bill Calculator",
-
-        description: "Bills, GST & expenses",
-
-        icon: "🧾"
-
-    },
-
-
-    daily: {
-
-        title: "Daily Tools",
-
-        description: "Useful everyday tools",
-
-        icon: "🧰"
-
-    },
-
-
-    security: {
-
-        title: "Security Tools",
-
-        description: "Protect your information",
-
-        icon: "🛡"
-
-    },
-
-
-    qr: {
-
-        title: "QR Scanner",
-
-        description: "Scan & generate QR",
-
-        icon: "▦"
-
-    },
-
-
-    notes: {
-
-        title: "Quick Notes",
-
-        description: "Write notes quickly",
-
-        icon: "📝"
-
-    }
-
-};
-
-
-
-/* =====================================================
-   OPEN TOOL
-===================================================== */
-
-function openTool(toolName) {
-
-    const data =
-        toolData[toolName];
-
-
-    if (!data) return;
-
-
-    currentTool =
-        toolName;
-
-
-    closeSideMenu();
-
-
-    document
-        .getElementById("toolHeaderName")
-        .textContent =
-        data.title;
-
-
-    document
-        .getElementById("toolHeaderDescription")
-        .textContent =
-        data.description;
-
-
-    document
-        .getElementById("toolHeaderIcon")
-        .textContent =
-        data.icon;
-
-
-    const body =
-        document.getElementById(
-            "toolBody"
-        );
-
-
-    switch (toolName) {
-
-        case "calculator":
-
-            body.innerHTML =
-                calculatorHTML();
-
-            break;
-
-
-        case "money":
-
-            body.innerHTML =
-                moneyHTML();
-
-            break;
-
-
-        case "converter":
-
-            body.innerHTML =
-                converterHTML();
-
-            break;
-
-
-        case "age":
-
-            body.innerHTML =
-                ageHTML();
-
-            break;
-
-
-        case "bills":
-
-            body.innerHTML =
-                billsHTML();
-
-            break;
-
-
-        case "daily":
-
-            body.innerHTML =
-                dailyHTML();
-
-            break;
-
-
-        case "security":
-
-            body.innerHTML =
-                securityHTML();
-
-            break;
-
-
-        case "qr":
-
-            body.innerHTML =
-                qrHTML();
-
-            break;
-
-
-        case "notes":
-
-            body.innerHTML =
-                notesHTML();
-
-            break;
-
-    }
-
-
-    document
-        .getElementById("toolScreen")
-        .classList.add("active");
-
-
-    document.body.style.overflow =
-        "hidden";
-
-
-    history.pushState(
-        {
-            tool: toolName
-        },
-        "",
-        "#tool-" + toolName
-    );
-
-}
-
-
-
-/* =====================================================
-   CLOSE TOOL
-===================================================== */
-
-function closeTool() {
-
-    const screen =
-        document.getElementById(
-            "toolScreen"
-        );
-
-
-    screen.classList.remove(
-        "active"
-    );
-
-
-    document.body.style.overflow =
-        "";
-
-
-    currentTool = null;
-
-
-    if (
-        location.hash.startsWith(
-            "#tool-"
-        )
-    ) {
-
-        history.replaceState(
-            null,
-            "",
-            location.pathname
-        );
-
-    }
-
-}
-
-
-
-/* =====================================================
-   ANDROID / BROWSER BACK
-===================================================== */
-
-window.addEventListener(
-    "popstate",
-    () => {
-
-        if (currentTool) {
-
-            document
-                .getElementById(
-                    "toolScreen"
-                )
-                .classList.remove(
-                    "active"
-                );
-
-            document.body.style.overflow =
-                "";
-
-            currentTool = null;
-
-        }
-
-    }
-);
-
-
-
-/* =====================================================
-   CALCULATOR HTML
-===================================================== */
-
-function calculatorHTML() {
-
-    return `
-
-        <div class="toolCard">
-
-            <div
-                class="calculatorDisplay">
-
-                <div
-                    id="calcExpression"
-                    class="calcExpression">
-
-                </div>
-
-                <div
-                    id="calcResult"
-                    class="calcResult">
-
-                    0
-
-                </div>
-
-            </div>
-
-
-            <div
-                class="calcButtons">
-
-
-                <button
-                    class="calcButton operator"
-                    onclick="clearCalculator()">
-
-                    AC
-
-                </button>
-
-
-                <button
-                    class="calcButton operator"
-                    onclick="calculatorInput('%')">
-
-                    %
-
-                </button>
-
-
-                <button
-                    class="calcButton operator"
-                    onclick="deleteCalculator()">
-
-                    ⌫
-
-                </button>
-
-
-                <button
-                    class="calcButton operator"
-                    onclick="calculatorInput('/')">
-
-                    ÷
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('7')">
-
-                    7
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('8')">
-
-                    8
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('9')">
-
-                    9
-
-                </button>
-
-
-                <button
-                    class="calcButton operator"
-                    onclick="calculatorInput('*')">
-
-                    ×
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('4')">
-
-                    4
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('5')">
-
-                    5
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('6')">
-
-                    6
-
-                </button>
-
-
-                <button
-                    class="calcButton operator"
-                    onclick="calculatorInput('-')">
-
-                    −
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('1')">
-
-                    1
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('2')">
-
-                    2
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('3')">
-
-                    3
-
-                </button>
-
-
-                <button
-                    class="calcButton operator"
-                    onclick="calculatorInput('+')">
-
-                    +
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('0')">
-
-                    0
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('00')">
-
-                    00
-
-                </button>
-
-
-                <button
-                    class="calcButton"
-                    onclick="calculatorInput('.')">
-
-                    .
-
-                </button>
-
-
-                <button
-                    class="calcButton equal"
-                    onclick="calculateResult()">
-
-                    =
-
-                </button>
-
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-
-/* =====================================================
-   CALCULATOR FUNCTIONS
-===================================================== */
-
-function calculatorInput(value) {
-
-    calculatorValue += value;
-
-    document
-        .getElementById(
-            "calcExpression"
-        )
-        .textContent =
-        calculatorValue;
-
-}
-
-
-function clearCalculator() {
-
-    calculatorValue = "";
-
-    document
-        .getElementById(
-            "calcExpression"
-        )
-        .textContent = "";
-
-    document
-        .getElementById(
-            "calcResult"
-        )
-        .textContent = "0";
-
-}
-
-
-function deleteCalculator() {
-
-    calculatorValue =
-        calculatorValue.slice(
-            0,
-            -1
-        );
-
-    document
-        .getElementById(
-            "calcExpression"
-        )
-        .textContent =
-        calculatorValue;
-
-}
-
-
-function calculateResult() {
-
-    try {
-
-        let expression =
-            calculatorValue
-            .replace(
-                /%/g,
-                "/100"
-            );
-
-
-        const result =
-            Function(
-                "return " +
-                expression
-            )();
-
-
-        document
-            .getElementById(
-                "calcResult"
-            )
-            .textContent =
-            Number(result)
-            .toLocaleString(
-                "en-IN",
-                {
-                    maximumFractionDigits: 8
-                }
-            );
-
-
-        addHistory(
-            calculatorValue,
-            result
-        );
-
-    }
-    catch {
-
-        document
-            .getElementById(
-                "calcResult"
-            )
-            .textContent =
-            "Error";
-
-    }
-
-}
-
-
-
-/* =====================================================
-   MONEY SPLITTER
-===================================================== */
-
-function moneyHTML() {
-
-    return `
-
-        <div class="toolCard">
-
-            <h2>
-                💰 Money Splitter
-            </h2>
-
-            <br>
-
-            <input
-                id="moneyAmount"
-                class="toolInput"
-                type="number"
-                placeholder="Total Amount">
-
-
-            <input
-                id="moneyPeople"
-                class="toolInput"
-                type="number"
-                placeholder="Number of People">
-
-
-            <button
-                class="toolAction"
-                onclick="splitMoney()">
-
-                SPLIT MONEY
-
-            </button>
-
-
-            <div
-                id="moneyResult"
-                class="resultCard">
-
-                <small>
-                    Each Person Pays
-                </small>
-
-                <div
-                    class="resultValue">
-
-                    ₹0.00
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function splitMoney() {
-
-    const amount =
-        Number(
-            document.getElementById(
-                "moneyAmount"
-            ).value
-        );
-
-
-    const people =
-        Number(
-            document.getElementById(
-                "moneyPeople"
-            ).value
-        );
-
-
-    if (
-        amount <= 0 ||
-        people <= 0
-    ) {
-
-        alert(
-            "Enter valid amount and people."
-        );
-
-        return;
-
-    }
-
-
-    const result =
-        amount / people;
-
-
-    document
-        .getElementById(
-            "moneyResult"
-        )
-        .innerHTML = `
-
-            <small>
-                Each Person Pays
-            </small>
-
-            <div class="resultValue">
-                ₹${result.toFixed(2)}
-            </div>
-
-        `;
-
-
-    addHistory(
-        "Split ₹" + amount,
-        result
-    );
-
-}
-
-
-
-/* =====================================================
-   CONVERTER
-===================================================== */
-
-function converterHTML() {
-
-    return `
-
-        <div class="toolCard">
-
-            <div class="converterTabs">
-
-                <button
-                    class="converterTab active"
-                    onclick="setConversion('length')">
-
-                    Length
-
-                </button>
-
-
-                <button
-                    class="converterTab"
-                    onclick="setConversion('weight')">
-
-                    Weight
-
-                </button>
-
-
-                <button
-                    class="converterTab"
-                    onclick="setConversion('volume')">
-
-                    Volume
-
-                </button>
-
-            </div>
-
-
-            <input
-                id="convertValue"
-                class="toolInput"
-                type="number"
-                value="5"
-                placeholder="Enter value">
-
-
-            <select
-                id="convertFrom"
-                class="toolSelect">
-
-                <option value="km">
-                    Kilometer
-                </option>
-
-                <option value="m">
-                    Meter
-                </option>
-
-                <option value="cm">
-                    Centimeter
-                </option>
-
-                <option value="mile">
-                    Mile
-                </option>
-
-            </select>
-
-
-            <select
-                id="convertTo"
-                class="toolSelect">
-
-                <option value="m">
-                    Meter
-                </option>
-
-                <option value="km">
-                    Kilometer
-                </option>
-
-                <option value="cm">
-                    Centimeter
-                </option>
-
-                <option value="mile">
-                    Mile
-                </option>
-
-            </select>
-
-
-            <button
-                class="toolAction"
-                onclick="convertUnit()">
-
-                ⇄ CONVERT
-
-            </button>
-
-
-            <div
-                id="convertResult"
-                class="resultCard">
-
-                <small>
-                    Converted Result
-                </small>
-
-                <div class="resultValue">
-                    5,000 m
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function convertUnit() {
-
-    const value =
-        Number(
-            document.getElementById(
-                "convertValue"
-            ).value
-        );
-
-
-    const from =
-        document.getElementById(
-            "convertFrom"
-        ).value;
-
-
-    const to =
-        document.getElementById(
-            "convertTo"
-        ).value;
-
-
-    const meterValues = {
-
-        km: 1000,
-
-        m: 1,
-
-        cm: .01,
-
-        mile: 1609.344
-
-    };
-
-
-    const result =
-        value *
-        meterValues[from] /
-        meterValues[to];
-
-
-    const names = {
-
-        km: "km",
-
-        m: "m",
-
-        cm: "cm",
-
-        mile: "mi"
-
-    };
-
-
-    document
-        .getElementById(
-            "convertResult"
-        )
-        .innerHTML = `
-
-            <small>
-                Converted Result
-            </small>
-
-            <div class="resultValue">
-
-                ${Number(result.toFixed(6)).toLocaleString()}
-                ${names[to]}
-
-            </div>
-
-        `;
-
-
-    addHistory(
-        value + " " + names[from],
-        result + " " + names[to]
-    );
-
-}
-
-
-function setConversion(type) {
-
-    const from =
-        document.getElementById(
-            "convertFrom"
-        );
-
-    const to =
-        document.getElementById(
-            "convertTo"
-        );
-
-
-    if (type === "weight") {
-
-        from.innerHTML = `
-
-            <option value="kg">
-                Kilogram
-            </option>
-
-            <option value="g">
-                Gram
-            </option>
-
-            <option value="lb">
-                Pound
-            </option>
-
-        `;
-
-
-        to.innerHTML = `
-
-            <option value="g">
-                Gram
-            </option>
-
-            <option value="kg">
-                Kilogram
-            </option>
-
-            <option value="lb">
-                Pound
-            </option>
-
-        `;
-
-    }
-    else if (type === "volume") {
-
-        from.innerHTML = `
-
-            <option value="l">
-                Liter
-            </option>
-
-            <option value="ml">
-                Milliliter
-            </option>
-
-        `;
-
-
-        to.innerHTML = `
-
-            <option value="ml">
-                Milliliter
-            </option>
-
-            <option value="l">
-                Liter
-            </option>
-
-        `;
-
-    }
-    else {
-
-        from.innerHTML = `
-
-            <option value="km">
-                Kilometer
-            </option>
-
-            <option value="m">
-                Meter
-            </option>
-
-            <option value="cm">
-                Centimeter
-            </option>
-
-            <option value="mile">
-                Mile
-            </option>
-
-        `;
-
-
-        to.innerHTML = `
-
-            <option value="m">
-                Meter
-            </option>
-
-            <option value="km">
-                Kilometer
-            </option>
-
-            <option value="cm">
-                Centimeter
-            </option>
-
-            <option value="mile">
-                Mile
-            </option>
-
-        `;
-
-    }
-
-}
-
-
-
-/* =====================================================
-   AGE CALCULATOR
-===================================================== */
-
-function ageHTML() {
-
-    return `
-
-        <div class="toolCard">
-
-            <h2>
-                📅 Age Calculator
-            </h2>
-
-            <br>
-
-            <input
-                id="birthDate"
-                class="toolInput"
-                type="date">
-
-
-            <button
-                class="toolAction"
-                onclick="calculateAge()">
-
-                CALCULATE AGE
-
-            </button>
-
-
-            <div
-                id="ageResult"
-                class="resultCard">
-
-                <small>
-                    Your Age
-                </small>
-
-                <div
-                    class="resultValue">
-
-                    -- Years
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function calculateAge() {
-
-    const value =
-        document.getElementById(
-            "birthDate"
-        ).value;
-
-
-    if (!value) {
-
-        alert(
-            "Select your date of birth."
-        );
-
-        return;
-
-    }
-
-
-    const birth =
-        new Date(value);
-
-    const today =
-        new Date();
-
-
-    let age =
-        today.getFullYear()
-        -
-        birth.getFullYear();
-
-
-    const month =
-        today.getMonth()
-        -
-        birth.getMonth();
-
-
-    if (
-        month < 0 ||
-        (
-            month === 0 &&
-            today.getDate()
-            <
-            birth.getDate()
-        )
-    ) {
-
-        age--;
-
-    }
-
-
-    document
-        .getElementById(
-            "ageResult"
-        )
-        .innerHTML = `
-
-            <small>
-                Your Age
-            </small>
-
-            <div class="resultValue">
-                ${age} Years
-            </div>
-
-        `;
-
-}
-
-
-
-/* =====================================================
-   BILL CALCULATOR
-===================================================== */
-
-function billsHTML() {
-
-    return `
-
-        <div class="toolCard">
-
-            <h2>
-                🧾 Bill Calculator
-            </h2>
-
-            <br>
-
-            <input
-                id="billAmount"
-                class="toolInput"
-                type="number"
-                placeholder="Bill Amount">
-
-
-            <input
-                id="billGST"
-                class="toolInput"
-                type="number"
-                value="18"
-                placeholder="GST %">
-
-
-            <button
-                class="toolAction"
-                onclick="calculateBill()">
-
-                CALCULATE BILL
-
-            </button>
-
-
-            <div
-                id="billResult"
-                class="resultCard">
-
-                <small>
-                    Total Amount
-                </small>
-
-                <div
-                    class="resultValue">
-
-                    ₹0.00
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function calculateBill() {
-
-    const amount =
-        Number(
-            document.getElementById(
-                "billAmount"
-            ).value
-        );
-
-
-    const gst =
-        Number(
-            document.getElementById(
-                "billGST"
-            ).value
-        );
-
-
-    if (amount <= 0) {
-
-        alert(
-            "Enter bill amount."
-        );
-
-        return;
-
-    }
-
-
-    const gstAmount =
-        amount * gst / 100;
-
-
-    const total =
-        amount + gstAmount;
-
-
-    document
-        .getElementById(
-            "billResult"
-        )
-        .innerHTML = `
-
-            <small>
-                Total Amount
-            </small>
-
-            <div class="resultValue">
-                ₹${total.toFixed(2)}
-            </div>
-
-            <p style="
-                color:#858799;
-                margin-top:8px;
-                font-size:11px">
-
-                GST:
-                ₹${gstAmount.toFixed(2)}
-
-            </p>
-
-        `;
-
-
-    addHistory(
-        "Bill + " + gst + "% GST",
-        total
-    );
-
-}
-
-
-
-/* =====================================================
-   DAILY TOOLS
-===================================================== */
-
-function dailyHTML() {
-
-    return `
-
-        <div class="toolCard">
-
-            <h2>
-                🧰 Daily Utilities
-            </h2>
-
-            <br>
-
-
-            <div class="quickGrid">
-
-
-                <button
-                    class="quickCard"
-                    onclick="startTimer()">
-
-                    <div class="quickCardIcon">
-                        ⏱
-                    </div>
-
-                    Timer
-
-                </button>
-
-
-                <button
-                    class="quickCard"
-                    onclick="randomNumber()">
-
-                    <div class="quickCardIcon">
-                        🎲
-                    </div>
-
-                    Random Number
-
-                </button>
-
-
-                <button
-                    class="quickCard"
-                    onclick="showDate()">
-
-                    <div class="quickCardIcon">
-                        📅
-                    </div>
-
-                    Today
-
-                </button>
-
-
-                <button
-                    class="quickCard"
-                    onclick="showTime()">
-
-                    <div class="quickCardIcon">
-                        🕐
-                    </div>
-
-                    Current Time
-
-                </button>
-
-            </div>
-
-
-            <div
-                id="dailyResult"
-                class="resultCard">
-
-                <small>
-                    Result
-                </small>
-
-                <div
-                    class="resultValue">
-
-                    Ready
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function randomNumber() {
-
-    const number =
-        Math.floor(
-            Math.random() * 100
-        ) + 1;
-
-
-    showDailyResult(
-        number
-    );
-
-}
-
-
-function showDate() {
-
-    showDailyResult(
-        new Date()
-        .toLocaleDateString()
-    );
-
-}
-
-
-function showTime() {
-
-    showDailyResult(
-        new Date()
-        .toLocaleTimeString()
-    );
-
-}
-
-
-function showDailyResult(value) {
-
-    document
-        .getElementById(
-            "dailyResult"
-        )
-        .innerHTML = `
-
-            <small>
-                Result
-            </small>
-
-            <div class="resultValue">
-                ${value}
-            </div>
-
-        `;
-
-}
-
-
-function startTimer() {
-
-    let seconds = 10;
-
-    showDailyResult(
-        seconds
-    );
-
-
-    const timer =
-        setInterval(() => {
-
-            seconds--;
-
-
-            showDailyResult(
-                seconds
-            );
-
-
-            if (
-                seconds <= 0
-            ) {
-
-                clearInterval(timer);
-
-                showDailyResult(
-                    "Done!"
-                );
-
-            }
-
-        }, 1000);
-
-}
-
-
-
-/* =====================================================
-   SECURITY
-===================================================== */
-
-function securityHTML() {
-
-    return `
-
-        <div class="toolCard">
-
-            <h2>
-                🛡 Secure Password
-            </h2>
-
-            <br>
-
-            <input
-                id="passwordLength"
-                class="toolInput"
-                type="number"
-                value="16"
-                min="6"
-                max="64"
-                placeholder="Password length">
-
-
-            <button
-                class="toolAction"
-                onclick="generatePassword()">
-
-                GENERATE PASSWORD
-
-            </button>
-
-
-            <div
-                id="passwordResult"
-                class="resultCard">
-
-                <small>
-                    Secure Password
-                </small>
-
-                <div
-                    id="generatedPassword"
-                    class="resultValue"
-                    style="
-                        font-size:18px;
-                        word-break:break-all">
-
-                    ••••••••••••
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function generatePassword() {
-
-    const length =
-        Number(
-            document.getElementById(
-                "passwordLength"
-            ).value
-        );
-
-
-    const chars =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-        "abcdefghijklmnopqrstuvwxyz" +
-        "0123456789" +
-        "!@#$%^&*";
-
-
-    let password = "";
-
-
-    for (
-        let i = 0;
-        i < length;
-        i++
-    ) {
-
-        password +=
-            chars[
-                Math.floor(
-                    Math.random()
-                    *
-                    chars.length
-                )
-            ];
-
-    }
-
-
-    document
-        .getElementById(
-            "generatedPassword"
-        )
-        .textContent =
-        password;
-
-}
-
-
-
-/* =====================================================
-   QR
-===================================================== */
-
-function qrHTML() {
-
-    return `
-
-        <div class="toolCard">
-
-            <h2>
-                ▦ QR Scanner
-            </h2>
-
-            <br>
-
-            <div class="resultCard">
-
-                <div style="
-                    font-size:70px">
-
-                    ▦
-
-                </div>
-
-                <p style="
-                    color:#858799;
-                    margin-top:10px">
-
-                    Camera scanner ready
-
-                </p>
-
-            </div>
-
-            <br>
-
-            <button
-                class="toolAction"
-                onclick="startQR()">
-
-                OPEN CAMERA
-
-            </button>
-
-            <br><br>
-
-            <button
-                class="toolAction"
-                onclick="generateQRText()">
-
-                GENERATE QR
-
-            </button>
-
-        </div>
-
-    `;
-
-}
-
-
-function startQR() {
-
-    alert(
-        "Camera permission will be requested when the QR scanner module is connected."
-    );
-
-}
-
-
-function generateQRText() {
-
-    const text =
-        prompt(
-            "Enter text for QR:"
-        );
-
-
-    if (text) {
-
-        alert(
-            "QR Generator ready for: "
-            + text
-        );
-
-    }
-
-}
-
-
-
-/* =====================================================
-   NOTES
-===================================================== */
-
-function notesHTML() {
-
-    const savedNote =
-        localStorage.getItem(
-            "leoToolsNote"
-        ) || "";
-
-
-    return `
-
-        <div class="toolCard">
-
-            <h2>
-                📝 Quick Notes
-            </h2>
-
-            <br>
-
-            <textarea
-                id="noteText"
-                class="toolTextarea"
-                placeholder="Write your note here...">${savedNote}</textarea>
-
-            <br><br>
-
-            <button
-                class="toolAction"
-                onclick="saveNote()">
-
-                SAVE NOTE
-
-            </button>
-
-        </div>
-
-    `;
-
-}
-
-
-function saveNote() {
-
-    const note =
-        document.getElementById(
-            "noteText"
-        ).value;
-
-
-    localStorage.setItem(
-        "leoToolsNote",
-        note
-    );
-
-
-    alert(
-        "Note saved successfully! ✓"
-    );
-
-}
-
-
-
-/* =====================================================
-   HISTORY
-===================================================== */
-
-function addHistory(
-    name,
-    result
-) {
-
-    historyData.unshift({
-
-        name: name,
-
-        result: result,
-
-        time:
-            new Date()
-            .toLocaleTimeString()
-
-    });
-
-
-    historyData =
-        historyData.slice(
-            0,
-            50
-        );
-
-
-    localStorage.setItem(
-        "leoToolsHistory",
-        JSON.stringify(
-            historyData
-        )
-    );
-
-}
-
-
-
-/* =====================================================
-   BOTTOM NAV
-===================================================== */
-
-function changePage(
-    page,
-    element
-) {
-
-    document
-        .querySelectorAll(
-            ".bottomItem"
-        )
-        .forEach(item => {
-
-            item.classList.remove(
-                "active"
-            );
-
-        });
-
-
-    element.classList.add(
-        "active"
-    );
-
-
-    const grid =
-        document.getElementById(
-            "toolGrid"
-        );
-
-
-    const hero =
-        document.querySelector(
-            ".heroCard"
-        );
-
-
-    const info =
-        document.querySelector(
-            ".infoStrip"
-        );
-
-
-    if (page === "home") {
-
-        grid.style.display =
-            "grid";
-
-        hero.style.display =
-            "block";
-
-        info.style.display =
-            "block";
-
-        return;
-
-    }
-
-
-    hero.style.display =
-        "none";
-
-    info.style.display =
-        "none";
-
-
-    if (page === "tools") {
-
-        grid.style.display =
-            "grid";
-
-        return;
-
-    }
-
-
-    grid.style.display =
-        "none";
-
-
-    if (page === "history") {
-
-        showHistory();
-
-    }
-
-
-    if (page === "favorites") {
-
-        showFavorites();
-
-    }
-
-}
-
-
-
-/* =====================================================
-   HISTORY PAGE
-===================================================== */
-
-function showHistory() {
-
-    const page =
-        document.getElementById(
-            "pageContent"
-        );
-
-
-    page.innerHTML = `
-
-        <div class="toolCard"
-             style="margin:20px">
-
-            <h2>
-                🕘 History
-            </h2>
-
-            <br>
-
-            ${
-                historyData.length
-                ?
-                historyData.map(
-                    item => `
-
-                    <div style="
-                        padding:14px 0;
-                        border-bottom:
-                        1px solid #222437">
-
-                        <strong>
-                            ${item.name}
-                        </strong>
-
-                        <br>
-
-                        <small style="
-                            color:#35ff72">
-
-                            ${item.result}
-
-                        </small>
-
-                        <small style="
-                            float:right;
-                            color:#77798a">
-
-                            ${item.time}
-
-                        </small>
-
-                    </div>
-
-                `
-                ).join("")
-                :
-                `
-                    <p style="
-                        color:#858799">
-
-                        No history yet.
-
-                    </p>
-                `
-            }
-
-        </div>
-
-    `;
-
-}
-
-
-
-/* =====================================================
-   FAVORITES
-===================================================== */
-
-function showFavorites() {
-
-    const page =
-        document.getElementById(
-            "pageContent"
-        );
-
-
-    page.innerHTML = `
-
-        <div class="toolCard"
-             style="margin:20px">
-
-            <h2>
-                ⭐ Favorites
-            </h2>
-
-            <br>
-
-            <p style="
-                color:#858799">
-
-                Favorite tools will
-                appear here.
-
-            </p>
-
-        </div>
-
-    `;
-
-}
-
-
-
 /* =====================================================
    SEARCH
 ===================================================== */
 
 function searchTools() {
 
-    const value =
+    const query =
         document.getElementById(
             "searchInput"
-        ).value
-        .toLowerCase();
+        ).value.toLowerCase();
 
 
     document
-        .querySelectorAll(
-            ".homeTool"
-        )
+        .querySelectorAll(".homeTool")
         .forEach(tool => {
 
             const name =
-                tool.dataset.name
-                .toLowerCase();
+                tool.dataset.name || "";
 
 
-            if (
-                name.includes(value)
-            ) {
-
-                tool.style.display =
-                    "";
-
-            }
-            else {
-
-                tool.style.display =
-                    "none";
-
-            }
+            tool.style.display =
+                name.includes(query)
+                    ? "flex"
+                    : "none";
 
         });
 
 }
 
+
+/* =====================================================
+   BOTTOM NAV
+===================================================== */
+
+function changePage(page, element) {
+
+    document
+        .querySelectorAll(".bottomItem")
+        .forEach(item =>
+            item.classList.remove("active")
+        );
+
+
+    element.classList.add("active");
+
+
+    const grid =
+        document.getElementById("toolGrid");
+
+
+    const hero =
+        document.querySelector(".heroCard");
+
+
+    const info =
+        document.querySelector(".infoStrip");
+
+
+    if (page === "home") {
+
+        grid.style.display = "grid";
+        hero.style.display = "block";
+        info.style.display = "block";
+
+        return;
+
+    }
+
+
+    hero.style.display = "none";
+    info.style.display = "none";
+
+
+    if (page === "tools") {
+
+        grid.style.display = "grid";
+
+        return;
+
+    }
+
+
+    grid.style.display = "none";
+
+
+    if (page === "history") {
+
+        alert("History coming soon");
+
+    }
+
+
+    if (page === "favorites") {
+
+        alert("Favorites coming soon");
+
+    }
+
+}
 
 
 /* =====================================================
@@ -2346,10 +1188,23 @@ function searchTools() {
 
 function openQuickTools() {
 
-    openTool("daily");
+    openTool("calculator");
 
 }
 
+
+/* =====================================================
+   PREMIUM
+===================================================== */
+
+function showPremium() {
+
+    alert(
+        "LeoTools Premium 🚀\n\n" +
+        "More powerful tools coming soon!"
+    );
+
+}
 
 
 /* =====================================================
@@ -2359,12 +1214,11 @@ function openQuickTools() {
 function voiceSearch() {
 
     if (
-        !("webkitSpeechRecognition"
-        in window)
+        !("webkitSpeechRecognition" in window)
     ) {
 
         alert(
-            "Voice search is not supported in this browser."
+            "Voice search is not supported."
         );
 
         return;
@@ -2376,26 +1230,19 @@ function voiceSearch() {
         new webkitSpeechRecognition();
 
 
-    recognition.lang =
-        "en-IN";
-
-
-    recognition.start();
+    recognition.lang = "en-IN";
 
 
     recognition.onresult =
         function(event) {
 
             const text =
-                event.results[0][0]
-                .transcript;
+                event.results[0][0].transcript;
 
 
-            document
-                .getElementById(
-                    "searchInput"
-                )
-                .value =
+            document.getElementById(
+                "searchInput"
+            ).value =
                 text;
 
 
@@ -2403,27 +1250,10 @@ function voiceSearch() {
 
         };
 
-}
 
-
-
-/* =====================================================
-   PREMIUM
-===================================================== */
-
-function showPremium() {
-
-    alert(
-        "👑 LeoTools Premium\n\n" +
-        "100+ Tools\n" +
-        "No Ads\n" +
-        "Advanced Tools\n" +
-        "Premium Themes\n" +
-        "Cloud Backup"
-    );
+    recognition.start();
 
 }
-
 
 
 /* =====================================================
@@ -2432,7 +1262,7 @@ function showPremium() {
 
 document.addEventListener(
     "keydown",
-    function(event) {
+    event => {
 
         if (
             event.key === "Escape" &&
